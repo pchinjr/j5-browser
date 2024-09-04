@@ -153,6 +153,7 @@ export class Board {
     await this.sendCommand(message);
 
     // Log after sending the command
+    this.log(`Binary State: ${this.pins[port].toString(2).padStart(8, '0')}`);
     this.log(`Command sent to set pin ${pin} to ${value ? 'HIGH' : 'LOW'}`);
   }
 }

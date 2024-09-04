@@ -27,7 +27,7 @@
     connectBtn.addEventListener('click', async () => {
       board = new Board();
       board.attachLogElement(logElement);  // Attach log element for logging
-      await board.connect(); // Pass the logData function to handle the logging
+      await board.connect();
       
       led = new Led(board, 13); // Initialize an LED on pin 13
 
