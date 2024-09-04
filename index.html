@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Serial + Firmata + LED</title>
+</head>
+<body>
+  <h1>Control an LED</h1>
+  <button id="connectBtn">Connect</button>
+  <button id="ledOnBtn" disabled>LED On</button>
+  <button id="ledOffBtn" disabled>LED Off</button>
+
+  <script type="module">
+    import { Board } from './Board.js';
+    import { Led } from './Led.js';
+
+    const connectBtn = document.getElementById('connectBtn');
+    const ledOnBtn = document.getElementById('ledOnBtn');
+    const ledOffBtn = document.getElementById('ledOffBtn');
+
+    let board;
+    let led;
+
+    connectBtn.addEventListener('click', async () => {
+      board = new Board();
+      await board.connect();
+      led = new Led(board, 13);
+
+      // Enable the LED buttons once the board is ready
+      ledOnBtn.disabled = false;
+      ledOffBtn.disabled = false;
+    });
+
+    ledOnBtn.addEventListener('click', async () => {
+      await led.on();
+    });
+
+    ledOffBtn.addEventListener('click', async () => {
+      await led.off();
+    });
+  </script>
+</body>
+</html>
