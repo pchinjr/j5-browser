@@ -10,6 +10,7 @@
   <button id="connectBtn">Connect</button>
   <button id="ledOnBtn" disabled>LED On</button>
   <button id="ledOffBtn" disabled>LED Off</button>
+  <textarea id="log" rows="20" cols="50" readonly></textarea>
 
   <script type="module">
     import { Board } from './Board.js';
@@ -18,14 +19,17 @@
     const connectBtn = document.getElementById('connectBtn');
     const ledOnBtn = document.getElementById('ledOnBtn');
     const ledOffBtn = document.getElementById('ledOffBtn');
+    const logElement = document.getElementById('log');
 
     let board;
     let led;
 
     connectBtn.addEventListener('click', async () => {
       board = new Board();
-      await board.connect();
-      led = new Led(board, 13);
+      board.attachLogElement(logElement);  // Attach log element for logging
+      await board.connect(); // Pass the logData function to handle the logging
+      
+      led = new Led(board, 13); // Initialize an LED on pin 13
 
       // Enable the LED buttons once the board is ready
       ledOnBtn.disabled = false;
