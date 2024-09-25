@@ -68,6 +68,18 @@ export class Board {
           this.log('Firmata is ready');
           break; // Exit the loop once the board is ready
         }
+
+        // Handle analog messages (analog pin reading)
+        if ((value[0] & 0xE0) === 0xE0) {
+          const pin = value[0] & 0x0F;
+          const analogValue = value[1] | (value[2] << 7);
+
+          // Log the analog value and pass it to any registered callback
+          this.log(`Analog Read: Pin ${pin}, Value: ${analogValue}`);
+          if (this.analogCallbacks[pin]) {
+            this.analogCallbacks[pin](analogValue); // Call the callback for that pin
+          }
+        }
       }
     } catch (error) {
       this.handleError(error, 'Error during Firmata initialization');
@@ -114,6 +126,19 @@ export class Board {
     }
   }
 
+  // Set pin mode
+  async setPinMode(pin, mode) {
+    const SET_PIN_MODE = 0xF4;
+    await this.sendCommand([SET_PIN_MODE, pin, mode]);
+  }
+
+  // Enable analog reporting on a given pin
+  async enableAnalogReporting(pin) {
+    const ENABLE_ANALOG_REPORTING = 0xC0 | pin;
+    await this.sendCommand([ENABLE_ANALOG_REPORTING, 1]);
+    this.log(`Analog reporting enabled on pin ${pin}`);
+  }
+
   // Send commands over serial
   async sendCommand(commandArray) {
     try {
@@ -123,12 +148,6 @@ export class Board {
     } catch (error) {
       this.log(`Error sending command to board: ${error}`);
     }
-  }
-
-  // Set pin mode
-  async setPinMode(pin, mode) {
-    const SET_PIN_MODE = 0xF4;
-    await this.sendCommand([SET_PIN_MODE, pin, mode]);
   }
 
   // Digital write to a pin
@@ -148,12 +167,30 @@ export class Board {
 
     // Log the command to be sent
     this.log(`Sending: ${message.map(byte => byte.toString(16).padStart(2, '0')).join(' ')}`);
-    
+
     // Send the command to the board
     await this.sendCommand(message);
 
     // Log after sending the command
     this.log(`Binary State: ${this.pins[port].toString(2).padStart(8, '0')}`);
     this.log(`Command sent to set pin ${pin} to ${value ? 'HIGH' : 'LOW'}`);
+  }
+
+  // Start reading analog data for a specific pin
+  startAnalogRead(pin, callback) {
+    // Register the pin for continuous analog reading
+    this.analogCallbacks = this.analogCallbacks || {}; // Initialize if undefined
+    this.analogCallbacks[pin] = (value) => {
+      this.log(`Analog Read: Pin ${pin}, Value: ${value}`);
+      if (callback) {
+        callback(value);
+      }
+    };
+    // Enable analog reporting for this pin
+    this.enableAnalogReporting(pin);
+  }
+
+  handleError(error, message) {
+    this.log(`${message}: ${error}`);
   }
 }

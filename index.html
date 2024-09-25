@@ -1,35 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Serial + Firmata + LED</title>
+  <title>Web Serial + Firmata + LED + Light Sensor</title>
 </head>
+
 <body>
-  <h1>Control an LED</h1>
+  <h1>Control an LED and Read Light Levels</h1>
   <button id="connectBtn">Connect</button>
   <button id="ledOnBtn" disabled>LED On</button>
   <button id="ledOffBtn" disabled>LED Off</button>
+  <p>Light Level: <span id="lightLevel">--</span></p>
   <textarea id="log" rows="20" cols="50" readonly></textarea>
+  <img src="cage-superman.jpg" id="cage" style="opacity: 0;" />
 
   <script type="module">
     import { Board } from './Board.js';
     import { Led } from './Led.js';
+    import { Light } from './Light.js';
 
     const connectBtn = document.getElementById('connectBtn');
     const ledOnBtn = document.getElementById('ledOnBtn');
     const ledOffBtn = document.getElementById('ledOffBtn');
     const logElement = document.getElementById('log');
+    const lightLevelElement = document.getElementById('lightLevel');
+    const cageImg = document.getElementById('cage');
 
     let board;
     let led;
+    let lightSensor;
 
     connectBtn.addEventListener('click', async () => {
       board = new Board();
       board.attachLogElement(logElement);  // Attach log element for logging
       await board.connect();
-      
+
       led = new Led(board, 13); // Initialize an LED on pin 13
+      lightSensor = new Light(board, 2); // Initialize light sensor on pin A2
+      await lightSensor.initialize();
+      await lightSensor.readLightLevel((lightValue) => {
+        // Update light level on the page
+        lightLevelElement.textContent = lightValue;
+
+        // Map the light value (1-1023) to opacity (0-1)
+        const opacity = lightValue / 1023;
+
+        // Set the opacity of the image
+        cageImg.style.opacity = opacity;
+      });
 
       // Enable the LED buttons once the board is ready
       ledOnBtn.disabled = false;
@@ -43,6 +63,8 @@
     ledOffBtn.addEventListener('click', async () => {
       await led.off();
     });
+
   </script>
 </body>
+
 </html>
