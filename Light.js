@@ -38,7 +38,7 @@ export class Light {
                     // Parse and extract analog value
                     const analogValue = parseAnalogMessage(value);
 
-                    if (analogValue !== null && analogValue > 100) {
+                    if (analogValue !== null && analogValue > 100) { // added 100 value breakpoint to limit dropped bytes
                         callback(analogValue); // Pass the analog value to the callback
                     } else {
                         handleNonAnalogMessage(value);
