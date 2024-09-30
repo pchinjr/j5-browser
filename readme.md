@@ -1,90 +1,121 @@
-# Web Serial API + Firmata + LED Control Project
+# Web Serial + Firmata LED & Light Sensor Project
 
-Using Johnny-Five.io as a starting point, this project allows you to control an Arduino board's LED from a web browser using the Web Serial API and the Firmata protocol. The system is set up using JavaScript, allowing users to connect to an Arduino board and toggle the onboard LED without needing additional server-side software. We've created the most basic example of how a J5 like implementation could work in the browser.
+## Overview
 
-## Project Structure
+This project is a basic implementation of a Web Serial API interface that communicates with an Arduino board using the **Firmata** protocol. The goal is to control an LED and read values from a light sensor, displaying the sensor data visually by mapping light levels to the opacity of an image on a webpage.
 
-### Files:
-
-1. **index.html** - The main HTML interface for the project.
-2. **Board.js** - Handles the connection, communication, and pin control for the Arduino board using the Web Serial API and Firmata protocol.
-3. **Led.js** - A simple class to manage turning the LED on or off on the Arduino board.
+The project uses modern JavaScript features to interface directly with the Arduino, allowing users to control an LED and visualize light sensor readings via the Web Serial API, all through their browser without needing extra software.
 
 ## Features
 
-- **Web Serial API**: Communicates with the Arduino board directly through a serial connection.
-- **Firmata Protocol**: Implements the Firmata protocol to send commands to the board.
-- **LED Control**: Enables turning the onboard LED on or off via two buttons in the browser interface.
-- **Logging**: Logs all serial communication between the browser and the board, including sent commands and received data.
+- **Connect to an Arduino**: Using the Web Serial API, the browser directly communicates with the Arduino.
+- **Control an LED**: Use buttons on the webpage to turn an LED connected to pin 13 on and off.
+- **Read Light Sensor Values**: Analog readings from a light sensor connected to pin A2 (pin 2) are collected and displayed.
+- **Visual Feedback**: The light levels control the opacity of an image of Nicolas Cage as Superman, creating a real-time interactive experience.
+- **Serial Monitor**: Real-time log of serial communication between the browser and the Arduino.
+
+## Technologies Used
+
+- **Web Serial API**: Allows direct communication between the browser and the Arduino via the serial port.
+- **Firmata Protocol**: Used for sending commands to the Arduino and receiving data.
+- **HTML/CSS/JavaScript**: Provides the interface, control logic, and visualization.
+- **Arduino Uno**: Microcontroller used for LED control and light sensor readings.
+
+## Hardware Requirements
+
+- **Arduino Uno**
+- **LED** (connected to pin 13)
+- **Photoresistor** (light sensor connected to analog pin A2)
+- **Resistors** for the LED and light sensor
+- USB cable to connect the Arduino to your computer
+
+## Setup Instructions
+
+1. **Clone the repository**: 
+   ```bash
+   git clone <repo-url>
+   ```
+2. **Upload Firmata to your Arduino**:
+   - Open the Arduino IDE.
+   - Go to **File** > **Examples** > **Firmata** > **StandardFirmata**.
+   - Select your board and port, then upload the sketch.
+   
+3. **Open the `index.html` in your browser**:
+   - Ensure you use a browser that supports the **Web Serial API** (currently Chrome, Edge).
+   - Click **Connect** to start the interaction with the Arduino.
 
 ## How It Works
 
-### Setup
+1. **Connecting to the Arduino**:
+   - Clicking the "Connect" button opens a serial port connection between the browser and Arduino.
+   - The system then initializes the Firmata protocol to communicate with the Arduino.
 
-The project connects to the Arduino using the browser's Web Serial API. When the "Connect" button is clicked, it prompts the user to select a serial device (the Arduino). The project initializes the Firmata protocol to communicate with the Arduino and sends commands to toggle the onboard LED.
+2. **LED Control**:
+   - The "LED On" and "LED Off" buttons control the state of an LED connected to pin 13 of the Arduino.
 
-### Components
+3. **Light Sensor Readings**:
+   - The project reads analog input from a photoresistor connected to pin A2 (analog pin 2).
+   - These readings (ranging from 0–1023) are displayed on the webpage.
+   - The light level is also mapped to the opacity of the **cage-superman.jpg** image.
 
-1. **Board Class** (`Board.js`):
-   - Handles connection to the Arduino through the Web Serial API.
-   - Implements the Firmata protocol to send commands to the Arduino.
-   - Manages the pins on the Arduino and logs communication to the webpage.
-   - Contains methods like `setPinMode()` and `digitalWrite()` to control the pins.
+4. **Serial Monitor**:
+   - A textarea on the webpage logs the communication between the browser and Arduino, showing each command sent and received in real time.
 
-2. **LED Class** (`Led.js`):
-   - A simple abstraction to control the onboard LED of the Arduino.
-   - Uses the `Board` class to send commands to turn the LED on or off.
+## Code Breakdown
 
-### User Interface (`index.html`)
+### 1. **Board.js**
+This class handles the main communication with the Arduino using the Web Serial API and Firmata protocol. Key methods include:
+- `connect()`: Establishes the serial connection and initializes Firmata.
+- `digitalWrite()`: Sends commands to turn an LED on or off.
+- `startAnalogRead()`: Reads analog input from the light sensor and logs values.
 
-The webpage contains:
-- A **Connect** button to establish a serial connection.
-- Two buttons: **LED On** and **LED Off**, which control the onboard LED once connected.
-- A text area that logs all serial communication.
+### 2. **Led.js**
+This class represents the LED connected to the Arduino. It provides two main methods:
+- `on()`: Turns the LED on.
+- `off()`: Turns the LED off.
 
-## Running the Project
+### 3. **Light.js**
+This class is responsible for reading the light levels from the photoresistor sensor. It initializes the sensor pin and continuously reads values using the Firmata protocol.
 
-1. **Clone the repository** to your local machine or serve it using a simple web server (you can use the Live Server extension in VSCode or a tool like `http-server`).
-   
-2. **Upload StandardFirmata to your Arduino**: 
-   Make sure the StandardFirmata sketch is loaded onto your Arduino. This sketch allows Firmata to communicate with the board. You can find it in the Arduino IDE under:
-   `File > Examples > Firmata > StandardFirmata`.
+### 4. **index.html**
+The interface includes:
+- Buttons to connect, turn on/off the LED.
+- A serial monitor that logs communication.
+- A light sensor value display and an image whose opacity changes based on the light sensor readings.
 
-3. **Open the `index.html` in a browser** that supports the Web Serial API (Chrome or Edge).
+### Example of Mapping Light Sensor Values:
+```js
+await lightSensor.readLightLevel((lightValue) => {
+  // Update light level on the page
+  lightLevelElement.textContent = lightValue;
 
-4. **Connect to your Arduino**:
-   - Click the **Connect** button and select the serial port connected to your Arduino board.
-   - Once connected, the **LED On** and **LED Off** buttons will be enabled.
-
-5. **Control the LED**:
-   - Click **LED On** to turn the onboard LED on pin 13 ON.
-   - Click **LED Off** to turn it OFF.
-
-## Example Serial Log
-
-```
-Serial port connected
-Initializing Firmata...
-Sent: ff
-Received: f9
-Firmata is ready
-Sent: f4 0d 01
-Sending: 91 20 00
-Sent: 91 20 00
-Command sent to set pin 13 to HIGH
-Sending: 91 00 00
-Sent: 91 00 00
-Command sent to set pin 13 to LOW
+  // Map the light value (1-1023) to opacity (0-1)
+  const opacity = lightValue / 1023;
+  cageImg.style.opacity = opacity;
+});
 ```
 
-The log shows a step-by-step account of the communication between the browser and the Arduino board, including Firmata initialization, pin mode setting, and toggling the LED.
+### Error Handling & Cleanup
+- Disconnects are monitored to prevent resource leaks.
+- Cleanup operations close the serial connection and release locks when the browser tab is refreshed or closed.
 
-## Error Handling
+## Styling
 
-If a disconnection occurs or the webpage is refreshed, the serial communication will be cleaned up automatically, and you will need to reconnect. Errors during communication are logged to the console.
+The webpage uses modern CSS to create a clean, responsive layout. The elements are styled with modern, minimalist aesthetics, with bold colors and smooth transitions to enhance the user experience. The **cage-superman.jpg** image is displayed with varying opacity, reflecting the real-time light sensor readings.
 
-## Future Improvements
+## Future Enhancements
 
-- **Add Support for More Devices**: You can extend this project to control other components like servos or sensors.
-- **Error Handling and UI Feedback**: Add more feedback for errors and improve the user interface to handle various states like failed connections or communication errors.
-- **Real-Time Updates**: Implement features to reflect real-time changes in the Arduino's state, such as reading inputs from sensors.
+- **Add more sensor types**: Expand the project to handle temperature, motion, and more.
+- **Advanced visualizations**: Introduce more dynamic visual feedback using CSS animations.
+- **Mobile support**: Adapt the project for mobile browsers that support Web Serial API.
+
+## Praise for Cage
+This project visually represents **Nicolas Cage as Superman**. As the room’s light level changes, the image of Cage fades in and out, reflecting the ambient environment. This homage to the long-lost Superman performance of Nicolas Cage creates a dramatic flair for every coding session.
+
+---
+
+### Credits
+
+- Nicolas Cage as Superman image from [various fan archives].
+- Built using the **Firmata protocol** and **Web Serial API**.
+
