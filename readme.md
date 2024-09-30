@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a basic implementation of a Web Serial API interface that communicates with an Arduino board using the **Firmata** protocol. The goal is to control an LED and read values from a light sensor, displaying the sensor data visually by mapping light levels to the opacity of an image on a webpage.
+This project is a basic implementation of a Web Serial API interface that communicates with an Arduino board using the **Firmata** protocol. The goal is to control an LED and read values from a light sensor, displaying the sensor data visually by mapping light levels to the opacity of an image on a webpage. 
 
 The project uses modern JavaScript features to interface directly with the Arduino, allowing users to control an LED and visualize light sensor readings via the Web Serial API, all through their browser without needing extra software.
 
